@@ -97,12 +97,13 @@ class DiffSingerVarianceExporter(BaseExporter):
             alpha = int(lora_cfg.get('alpha', 16))
             targets = lora_cfg.get('target_modules', ['linear'])
             inject_lora(model, rank=rank, alpha=alpha, target_modules=targets)
+            model.to(self.device)
             base_ckpt = lora_cfg.get('base_ckpt', None)
             if base_ckpt:
-                load_ckpt(model, base_ckpt, ckpt_steps=None, prefix_in_ckpt='model', strict=True, device=self.device)
+                load_ckpt(model, base_ckpt, ckpt_steps=None, prefix_in_ckpt='model', strict=False, device=self.device)
             else:
                 load_ckpt(model, hparams['work_dir'], ckpt_steps=self.ckpt_steps,
-                          prefix_in_ckpt='model', strict=True, device=self.device)
+                          prefix_in_ckpt='model', strict=False, device=self.device)
             from utils.training_utils import get_latest_checkpoint_path
             latest = get_latest_checkpoint_path(Path(hparams['work_dir']))
             if latest:

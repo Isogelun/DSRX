@@ -6,14 +6,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from modules.commons.common_layers import SinusoidalPosEmb
+from modules.commons.common_layers import KaimingNormalConv1d as Conv1d
 from utils.hparams import hparams
-
-
-class Conv1d(torch.nn.Conv1d):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        nn.init.kaiming_normal_(self.weight)
-
 
 class ResidualBlock(nn.Module):
     def __init__(self, encoder_hidden, residual_channels, dilation):
