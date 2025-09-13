@@ -1,0 +1,617 @@
+a	a
+ai	a I
+an	a N
+ang	A ng
+ao	A O
+ba	b a
+bai	b a I
+ban	b a N
+bang	b A ng
+bao	b A O
+be	b e
+bei	b E I
+ben	b e N
+beng	b e ng
+ber	b aa R
+bi	b i
+bia	b ia
+bian	b iE N
+biang	b iA ng
+biao	b iA O
+bie	b ie
+bin	b i N
+bing	b i ng
+biong	b iO ng
+biu	b io U
+bo	b uo
+bong	b oo ng
+bou	b o U
+bu	b u
+bua	b ua
+buai	b ua I
+buan	b ua N
+buang	b uA ng
+bui	b uE I
+bun	b ue N
+bv	b v
+bve	b ve
+ca	c a
+cai	c a I
+can	c a N
+cang	c A ng
+cao	c A O
+ce	c e
+cei	c E I
+cen	c e N
+ceng	c e ng
+cer	c aa R
+cha	ch a
+chai	ch a I
+chan	ch a N
+chang	ch A ng
+chao	ch A O
+che	ch e
+chei	ch E I
+chen	ch e N
+cheng	ch e ng
+cher	ch aa R
+chi	ch ir
+chong	ch oo ng
+chou	ch o U
+chu	ch u
+chua	ch ua
+chuai	ch ua I
+chuan	ch ua N
+chuang	ch uA ng
+chui	ch uE I
+chun	ch ue N
+chuo	ch uo
+chv	ch v
+chyi	ch i
+ci	c i0
+cong	c oo ng
+cou	c o U
+cu	c u
+cua	c ua
+cuai	c ua I
+cuan	c ua N
+cuang	c uA ng
+cui	c uE I
+cun	c ue N
+cuo	c uo
+cv	c v
+cyi	c i
+da	d a
+dai	d a I
+dan	d a N
+dang	d A ng
+dao	d A O
+de	d e
+dei	d E I
+den	d e N
+deng	d e ng
+der	d aa R
+di	d i
+dia	d ia
+dian	d iE N
+diang	d iA ng
+diao	d iA O
+die	d ie
+din	d i N
+ding	d i ng
+diong	d iO ng
+diu	d io U
+dong	d oo ng
+dou	d o U
+du	d u
+dua	d ua
+duai	d ua I
+duan	d ua N
+duang	d uA ng
+dui	d uE I
+dun	d ue N
+duo	d uo
+dv	d v
+dve	d ve
+e	e
+ei	E I
+en	e N
+eng	e ng
+er	aa R
+fa	f a
+fai	f a I
+fan	f a N
+fang	f A ng
+fao	f A O
+fe	f e
+fei	f E I
+fen	f e N
+feng	f e ng
+fer	f aa R
+fi	f i
+fia	f ia
+fian	f iE N
+fiang	f iA ng
+fiao	f iA O
+fie	f ie
+fin	f i N
+fing	f i ng
+fiong	f iO ng
+fiu	f io U
+fo	f uo
+fong	f oo ng
+fou	f o U
+fu	f u
+fua	f ua
+fuai	f ua I
+fuan	f ua N
+fuang	f uA ng
+fui	f uE I
+fun	f ue N
+fv	f v
+fve	f ve
+ga	g a
+gai	g a I
+gan	g a N
+gang	g A ng
+gao	g A O
+ge	g e
+gei	g E I
+gen	g e N
+geng	g e ng
+ger	g aa R
+gi	g i
+gia	g ia
+gian	g iE N
+giang	g iA ng
+giao	g iA O
+gie	g ie
+gin	g i N
+ging	g i ng
+giong	g iO ng
+giu	g io U
+gong	g oo ng
+gou	g o U
+gu	g u
+gua	g ua
+guai	g ua I
+guan	g ua N
+guang	g uA ng
+gui	g uE I
+gun	g ue N
+guo	g uo
+gv	g v
+gve	g ve
+ha	h a
+hai	h a I
+han	h a N
+hang	h A ng
+hao	h A O
+he	h e
+hei	h E I
+hen	h e N
+heng	h e ng
+her	h aa R
+hi	h i
+hia	h ia
+hian	h iE N
+hiang	h iA ng
+hiao	h iA O
+hie	h ie
+hin	h i N
+hing	h i ng
+hiong	h iO ng
+hiu	h io U
+hong	h oo ng
+hou	h o U
+hu	h u
+hua	h ua
+huai	h ua I
+huan	h ua N
+huang	h uA ng
+hui	h uE I
+hun	h ue N
+huo	h uo
+hv	h v
+hve	h ve
+ji	j i
+jia	j ia
+jian	j iE N
+jiang	j iA ng
+jiao	j iA O
+jie	j ie
+jin	j i N
+jing	j i ng
+jiong	j iO ng
+jiu	j io U
+ju	j v
+juan	j vE N
+jue	j ve
+jun	j v0 N
+ka	k a
+kai	k a I
+kan	k a N
+kang	k A ng
+kao	k A O
+ke	k e
+kei	k E I
+ken	k e N
+keng	k e ng
+ker	k aa R
+ki	k i
+kia	k ia
+kian	k iE N
+kiang	k iA ng
+kiao	k iA O
+kie	k ie
+kin	k i N
+king	k i ng
+kiong	k iO ng
+kiu	k io U
+kong	k oo ng
+kou	k o U
+ku	k u
+kua	k ua
+kuai	k ua I
+kuan	k ua N
+kuang	k uA ng
+kui	k uE I
+kun	k ue N
+kuo	k uo
+kv	k v
+kve	k ve
+la	l a
+lai	l a I
+lan	l a N
+lang	l A ng
+lao	l A O
+le	l e
+lei	l E I
+len	l e N
+leng	l e ng
+ler	l aa R
+li	l i
+lia	l ia
+lian	l iE N
+liang	l iA ng
+liao	l iA O
+lie	l ie
+lin	l i N
+ling	l i ng
+liong	l iO ng
+liu	l io U
+lo	l o
+long	l oo ng
+lou	l o U
+lu	l u
+lua	l ua
+luai	l ua I
+luan	l ua N
+luang	l uA ng
+lui	l uE I
+lun	l ue N
+luo	l uo
+lv	l v
+lve	l ve
+ma	m a
+mai	m a I
+man	m a N
+mang	m A ng
+mao	m A O
+me	m e
+mei	m E I
+men	m e N
+meng	m e ng
+mer	m aa R
+mi	m i
+mia	m ia
+mian	m iE N
+miang	m iA ng
+miao	m iA O
+mie	m ie
+min	m i N
+ming	m i ng
+miong	m iO ng
+miu	m io U
+mo	m uo
+mong	m oo ng
+mou	m o U
+mu	m u
+mua	m ua
+muai	m ua I
+muan	m ua N
+muang	m uA ng
+mui	m uE I
+mun	m ue N
+mv	m v
+mve	m ve
+na	n a
+nai	n a I
+nan	n a N
+nang	n A ng
+nao	n A O
+ne	n e
+nei	n E I
+nen	n e N
+neng	n e ng
+ner	n aa R
+ni	n i
+nia	n ia
+nian	n iE N
+niang	n iA ng
+niao	n iA O
+nie	n ie
+nin	n i N
+ning	n i ng
+niong	n iO ng
+niu	n io U
+nong	n oo ng
+nou	n o U
+nu	n u
+nua	n ua
+nuai	n ua I
+nuan	n ua N
+nuang	n uA ng
+nui	n uE I
+nun	n ue N
+nuo	n uo
+nv	n v
+nve	n ve
+o	o
+ong	oo ng
+ou	o U
+pa	p a
+pai	p a I
+pan	p a N
+pang	p A ng
+pao	p A O
+pe	p e
+pei	p E I
+pen	p e N
+peng	p e ng
+per	p aa R
+pi	p i
+pia	p ia
+pian	p iE N
+piang	p iA ng
+piao	p iA O
+pie	p ie
+pin	p i N
+ping	p i ng
+piong	p iO ng
+piu	p io U
+po	p uo
+pong	p oo ng
+pou	p o U
+pu	p u
+pua	p ua
+puai	p ua I
+puan	p ua N
+puang	p uA ng
+pui	p uE I
+pun	p ue N
+pv	p v
+pve	p ve
+qi	q i
+qia	q ia
+qian	q iE N
+qiang	q iA ng
+qiao	q iA O
+qie	q ie
+qin	q i N
+qing	q i ng
+qiong	q iO ng
+qiu	q io U
+qu	q v
+quan	q vE N
+que	q ve
+qun	q v0 N
+ra	r a
+rai	r a I
+ran	r a N
+rang	r A ng
+rao	r A O
+re	r e
+rei	r E I
+ren	r e N
+reng	r e ng
+rer	r aa R
+ri	r ir
+rong	r oo ng
+rou	r o U
+ru	r u
+rua	r ua
+ruai	r ua I
+ruan	r ua N
+ruang	r uA ng
+rui	r uE I
+run	r ue N
+ruo	r uo
+rv	r v
+ryi	r i
+sa	s a
+sai	s a I
+san	s a N
+sang	s A ng
+sao	s A O
+se	s e
+sei	s E I
+sen	s e N
+seng	s e ng
+ser	s aa R
+sha	sh a
+shai	sh a I
+shan	sh a N
+shang	sh A ng
+shao	sh A O
+she	sh e
+shei	sh E I
+shen	sh e N
+sheng	sh e ng
+sher	sh aa R
+shi	sh ir
+shong	sh oo ng
+shou	sh o U
+shu	sh u
+shua	sh ua
+shuai	sh ua I
+shuan	sh ua N
+shuang	sh uA ng
+shui	sh uE I
+shun	sh ue N
+shuo	sh uo
+shv	sh v
+shyi	sh i
+si	s i0
+song	s oo ng
+sou	s o U
+su	s u
+sua	s ua
+suai	s ua I
+suan	s ua N
+suang	s uA ng
+sui	s uE I
+sun	s ue N
+suo	s uo
+sv	s v
+syi	s i
+ta	t a
+tai	t a I
+tan	t a N
+tang	t A ng
+tao	t A O
+te	t e
+tei	t E I
+ten	t e N
+teng	t e ng
+ter	t aa R
+ti	t i
+tia	t ia
+tian	t iE N
+tiang	t iA ng
+tiao	t iA O
+tie	t ie
+tin	t i N
+ting	t i ng
+tiong	t iO ng
+tong	t oo ng
+tou	t o U
+tu	t u
+tua	t ua
+tuai	t ua I
+tuan	t ua N
+tuang	t uA ng
+tui	t uE I
+tun	t ue N
+tuo	t uo
+tv	t v
+tve	t ve
+wa	w ua
+wai	w ua I
+wan	w ua N
+wang	w uA ng
+wao	w uA O
+we	w e
+wei	w uE I
+wen	w ue N
+weng	w ue ng
+wer	w aa R
+wi	w i
+wo	w uo
+wong	w oo ng
+wou	w o U
+wu	w u
+xi	x i
+xia	x ia
+xian	x iE N
+xiang	x iA ng
+xiao	x iA O
+xie	x ie
+xin	x i N
+xing	x i ng
+xiong	x iO ng
+xiu	x io U
+xu	x v
+xuan	x vE N
+xue	x ve
+xun	x v0 N
+ya	y ia
+yai	y a I
+yan	y iE N
+yang	y iA ng
+yao	y iA O
+ye	y ie
+yei	y ie I
+yi	y i
+yin	y i N
+ying	y i ng
+yo	y io
+yong	y io ng
+you	y io U
+yu	y v
+yuan	y vE N
+yue	y ve
+yun	y v0 N
+ywu	y u
+za	z a
+zai	z a I
+zan	z a N
+zang	z A ng
+zao	z A O
+ze	z e
+zei	z E I
+zen	z e N
+zeng	z e ng
+zer	z aa R
+zha	zh a
+zhai	zh a I
+zhan	zh a N
+zhang	zh A ng
+zhao	zh A O
+zhe	zh e
+zhei	zh E I
+zhen	zh e N
+zheng	zh e ng
+zher	zh aa R
+zhi	zh ir
+zhong	zh oo ng
+zhou	zh o U
+zhu	zh u
+zhua	zh ua
+zhuai	zh ua I
+zhuan	zh ua N
+zhuang	zh uA ng
+zhui	zh uE I
+zhun	zh ue N
+zhuo	zh uo
+zhv	zh v
+zhyi	zh i
+zi	z i0
+zong	z oo ng
+zou	z o U
+zu	z u
+zua	z ua
+zuai	z ua I
+zuan	z ua N
+zuang	z uA ng
+zui	z uE I
+zun	z ue N
+zuo	z uo
+zv	z v
+zyi	z i
+i	y i
+in	y i N
+ing	y i ng
+u	w u
+hw	h u
+v	y v
+vn	y v0 N
+ir	ir
+i0	i0
+e0	E
+en0	iE N
+nue	n ve
+lue	l ve
+cl	cl
+exAP	exAP
+nn	nn

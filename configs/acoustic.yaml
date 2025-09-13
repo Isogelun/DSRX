@@ -1,0 +1,233 @@
+base_config:
+  - configs/base.yaml
+
+task_cls: training.acoustic_task.AcousticTask
+
+dictionaries:
+  zh: dictionaries/opencpop-extension-triple-2.txt
+  ja: dictionaries/jpn.txt
+extra_phonemes: []
+merged_phoneme_groups: 
+    - ['ja/Edge', 'ja/cl', 'zh/cl']
+datasets:
+  - raw_data_dir: 'data/117'
+    speaker: 117
+    spk_id: 0
+    language: zh
+    test_prefixes:
+      - '64_budebuai_seg015'
+      - '71_mingrizange_seg042'
+
+  - raw_data_dir: 'data/hiro Ja'
+    speaker: hiro
+    spk_id: 1
+    language: ja
+    test_prefixes:
+      - '化作青烟 (1)_011'
+      - '終着_011'
+
+  - raw_data_dir: 'data/kiritan'
+    speaker: kiritan
+    spk_id: 2
+    language: ja
+    test_prefixes:
+      - '01_seg008'
+      - '04_seg012'
+
+  - raw_data_dir: 'data/liliko'
+    speaker: liliko
+    spk_id: 3
+    language: zh
+    test_prefixes:
+      - 'hanser_908_0'
+      - 'hanser_973_0'
+
+  - raw_data_dir: 'data/rintaku_masaru'
+    speaker: rintaku
+    spk_id: 4
+    language: ja
+
+  - raw_data_dir: 'data/sansha'
+    speaker: sansha
+    spk_id: 5
+    language: zh
+
+  - raw_data_dir: 'data/shenluxiao_JPN'
+    speaker: shenluxiao
+    spk_id: 6
+    language: ja
+    
+  - raw_data_dir: 'data/weina'
+    speaker: weina
+    spk_id: 7
+    language: ja
+
+  - raw_data_dir: 'data/xiaoran'
+    speaker: xiaoran
+    spk_id: 8
+    language: zh
+
+  - raw_data_dir: 'data/xuanzhuan_ACE/raw'
+    speaker: xuanzhuan
+    spk_id: 9
+    language: zh
+
+  - raw_data_dir: 'data/yoko/diffsinger_db'
+    speaker: yoko
+    spk_id: 10
+    language: ja
+
+  - raw_data_dir: 'data/ichika'
+    speaker: ichika
+    spk_id: 11
+    language: ja
+
+  - raw_data_dir: 'data/moqi_diffsinger'
+    speaker: moqi
+    spk_id: 12
+    language: zh
+    test_prefixes:
+      - 'moqi_岁月成碑_岁月成碑 moqi voice_seg025'
+
+  - raw_data_dir: 'data/qiguanmo'
+    speaker: qiguanmo
+    spk_id: 13
+    language: zh
+    test_prefixes:
+      - '世末歌者_世末歌者干音_Audio 2.cm-St_seg013'
+
+vocoder: NsfHifiGAN
+vocoder_ckpt: vocoder/kouon_nsf-hifigan_1031_44100hz_512hop_128bin.ckpt
+audio_sample_rate: 44100
+audio_num_mel_bins: 128
+hop_size: 512            # Hop size.
+fft_size: 2048           # FFT size.
+win_size: 2048           # FFT size.
+fmin: 40
+fmax: 16000
+
+binarization_args:
+  shuffle: true
+  num_workers: 40
+  allow_missing_phonemes: true
+augmentation_args:
+  random_pitch_shifting:
+    enabled: true
+    range: [-12., 12.]
+    scale: 5.0
+  fixed_pitch_shifting:
+    enabled: false
+    targets: [-5., 5.]
+    scale: 0.5
+  random_time_stretching:
+    enabled: true
+    range: [0.5, 2.]
+    scale: 0.75
+
+binary_data_dir: 'data/opencpop/binary'
+binarizer_cls: preprocessing.acoustic_binarizer.AcousticBinarizer
+spec_min: [-12]
+spec_max: [0]
+mel_vmin: -14.
+mel_vmax: 4.
+mel_base: 'e'
+energy_smooth_width: 0.12
+breathiness_smooth_width: 0.12
+voicing_smooth_width: 0.12
+tension_smooth_width: 0.12
+
+use_lang_id: true
+num_lang: 2
+use_spk_id: true
+num_spk: 14
+use_energy_embed: false
+use_breathiness_embed: false
+use_voicing_embed: false
+use_tension_embed: false
+use_key_shift_embed: true
+use_speed_embed: true
+
+diffusion_type: reflow
+time_scale_factor: 1000
+timesteps: 1000
+max_beta: 0.02
+rel_pos: true
+sampling_algorithm: euler
+sampling_steps: 20
+diff_accelerator: ddim
+diff_speedup: 10
+hidden_size: 256
+backbone_type: 'wavenet'
+backbone_args:
+  num_channels: 512
+  num_layers: 20
+  kernel_size: 31
+  dropout_rate: 0.0
+main_loss_type: l2
+main_loss_log_norm: false
+schedule_type: 'linear'
+
+# shallow diffusion
+use_shallow_diffusion: true
+T_start: 0.4
+T_start_infer: 0.4
+K_step: 400
+K_step_infer: 400
+
+shallow_diffusion_args:
+  train_aux_decoder: true
+  train_diffusion: true
+  val_gt_start: false
+  aux_decoder_arch: convnext
+  aux_decoder_args:
+    num_channels: 512
+    num_layers: 6
+    kernel_size: 7
+    dropout_rate: 0.1
+  aux_decoder_grad: 0.1
+
+lambda_aux_mel_loss: 0.2
+
+# train and eval
+num_sanity_val_steps: 1
+optimizer_args:
+  lr: 0.0006
+lr_scheduler_args:
+  step_size: 10000
+  gamma: 0.75
+max_batch_frames: 16000
+max_batch_size: 24
+dataset_size_key: 'lengths'
+val_with_vocoder: true
+val_check_interval: 2000
+num_valid_plots: 10
+max_updates: 10000
+num_ckpt_keep: 5
+permanent_ckpt_start: 80000
+permanent_ckpt_interval: 20000
+
+finetune_enabled: false
+finetune_ckpt_path: null
+
+finetune_ignored_params:
+  - model.fs2.encoder.embed_tokens
+  - model.fs2.txt_embed
+  - model.fs2.spk_embed
+finetune_strict_shapes: true
+
+freezing_enabled: false
+frozen_params: []
+
+# LoRA fine-tuning (optional)
+lora:
+  enabled: true
+  rank: 8
+  alpha: 16
+  target_modules: ['^fs2\.', '^diffusion\.']
+  base_ckpt: checkpoints\20250901_acoustic\model_ckpt_steps_160000.ckpt   # path to base full checkpoint or leave empty to use work_dir
+  train_bias: true
+  merge_before_export: true
+
+
+ds_workers: 0
+
