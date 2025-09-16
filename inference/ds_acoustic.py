@@ -112,24 +112,25 @@ class DiffSingerAcousticInfer(BaseSVSInfer):
         batch = {}
         summary = OrderedDict()
 
-        lang = param.get('lang')
-        if lang is None:
-            assert len(self.lang_map) <= 1, (
-                "This is a multilingual model. "
-                "Please specify a language by --lang option."
-            )
-        else:
-            assert lang in self.lang_map, f'Unrecognized language name: \'{lang}\'.'
+        tokens = param['ph_seq'].split()
+        lang, phoneme_langs = self._resolve_language_config(tokens, param.get('lang'))
         if hparams.get('use_lang_id', False):
-            languages = torch.LongTensor([
-                (
-                    self.lang_map[lang if '/' not in p else p.split('/', maxsplit=1)[0]]
-                    if self.phoneme_dictionary.is_cross_lingual(p)
-                    else 0
+            lang_ids = []
+            for phone, phone_lang in zip(tokens, phoneme_langs):
+                if not self.phoneme_dictionary.is_cross_lingual(phone):
+                    lang_ids.append(0)
+                    continue
+                assert self.lang_map, (
+                    'Language map is required when language IDs are enabled.'
                 )
-                for p in param['ph_seq'].split()
-            ]).to(self.device)  # => [B, T_txt]
-            batch['languages'] = languages
+                assert phone_lang is not None, (
+                    f"Missing language tag for phoneme '{phone}' required by language id embedding."
+                )
+                assert phone_lang in self.lang_map, (
+                    f"Phoneme '{phone}' uses unknown language '{phone_lang}'."
+                )
+                lang_ids.append(self.lang_map[phone_lang])
+            batch['languages'] = torch.LongTensor(lang_ids).to(self.device)  # => [B, T_txt]
         txt_tokens = torch.LongTensor([
             self.phoneme_dictionary.encode(param['ph_seq'], lang=lang)
         ]).to(self.device)  # => [B, T_txt]

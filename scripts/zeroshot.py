@@ -274,7 +274,7 @@ def _auto_pick_reference_wav(pref_dirnames: Tuple[str, ...] = ("测试用音色"
 @click.option("--ckpt", type=click.IntRange(min=0), required=False, help="Checkpoint steps")
 @click.option("--ref", type=click.Path(exists=True, dir_okay=False, path_type=pathlib.Path), required=False,
               help="Reference dry voice wav")
-@click.option("--lang", type=click.STRING, required=False, help="Default language (e.g. zh, ja)")
+@click.option("--lang", type=click.STRING, required=False, help="Default language (e.g. zh, ja) or \"auto\" for phoneme tags")
 @click.option("--out", type=click.Path(file_okay=False, dir_okay=True, path_type=pathlib.Path), required=False,
               help="Output folder")
 @click.option("--title", type=click.STRING, required=False, help="Output title (filename)")
