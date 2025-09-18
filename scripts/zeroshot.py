@@ -15,7 +15,7 @@ sys.path.insert(0, str(root_dir))
 
 
 def _find_exp(exp: str) -> str:
-    ckpt_root = root_dir / "checkpoints"
+    ckpt_root = root_dir / "ckpt"
     if not (ckpt_root / exp).exists():
         for subdir in ckpt_root.iterdir():
             if not subdir.is_dir():
@@ -26,7 +26,7 @@ def _find_exp(exp: str) -> str:
                 break
         else:
             raise click.BadParameter(
-                f"There are no matching exp starting with '{exp}' in 'checkpoints' folder. "
+                f"There are no matching exp starting with '{exp}' in 'ckpt' folder. "
                 f"Please specify '--exp' as the folder name or prefix."
             )
     else:
@@ -314,7 +314,7 @@ def main(proj: Path, exp: str, ckpt: int, ref: Path, lang: str, out: Path, title
     out.mkdir(parents=True, exist_ok=True)
 
     # Ensure language field for multilingual models
-    if (root_dir / "checkpoints" / exp / "lang_map.json").exists() and lang is None:
+    if (root_dir / "ckpt" / exp / "lang_map.json").exists() and lang is None:
         # Default to zh if not provided
         lang = "zh"
 

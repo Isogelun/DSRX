@@ -28,7 +28,7 @@ dropout: 0.1
 use_pos_embed: true
 enc_layers: 4
 num_heads: 2
-enc_ffn_kernel_size: 9
+enc_ffn_kernel_size: 3
 ffn_act: gelu
 use_spk_id: false
 
@@ -61,9 +61,9 @@ max_batch_size: 100000
 max_val_batch_frames: 60000
 max_val_batch_size: 1
 pe: parselmouth
-pe_ckpt: 'checkpoints/rmvpe/model.pt'
+pe_ckpt: 'ckpt/rmvpe/model.pt'
 hnsep: world
-hnsep_ckpt: 'checkpoints/vr/model.pt'
+hnsep_ckpt: 'ckpt/vr/model.pt'
 f0_min: 40
 f0_max: 2000
 num_valid_plots: 100

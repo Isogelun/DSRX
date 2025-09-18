@@ -276,7 +276,7 @@ A pitch extractor estimates pitch (F0 sequence) from given recordings. F0 (funda
 
 ```yaml
 pe: parselmouth  # pitch extractor type
-pe_ckpt: checkpoints/xxx/model.pt  # pitch extractor model path (if it requires any)
+pe_ckpt: ckpt/xxx/model.pt  # pitch extractor model path (if it requires any)
 ```
 
 #### Parselmouth
@@ -297,7 +297,7 @@ To enable RMVPE, download its pre-trained checkpoint from [here](https://github.
 
 ```yaml
 pe: rmvpe
-pe_ckpt: checkpoints/rmvpe/model.pt
+pe_ckpt: ckpt/rmvpe/model.pt
 ```
 
 #### Harvest
@@ -339,7 +339,7 @@ To enable VR, download its pre-trained checkpoint from [here](https://github.com
 
 ```yaml
 hnsep: vr
-hnsep_ckpt: checkpoints/vr/model.pt
+hnsep_ckpt: ckpt/vr/model.pt
 ```
 
 ## Shallow diffusion

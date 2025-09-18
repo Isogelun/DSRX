@@ -220,6 +220,8 @@ class BaseTask(pl.LightningModule):
     def on_train_epoch_start(self):
         if self.training_sampler is not None:
             self.training_sampler.set_epoch(self.current_epoch)
+        if "ep" in str(hparams['val_check_interval']):
+            self.logger.log_metrics({'epoch/current_epoch': self.current_epoch}, step=self.global_step)
 
     def _training_step(self, sample):
         """
@@ -240,6 +242,10 @@ class BaseTask(pl.LightningModule):
             tb_log = {f'training/{k}': v for k, v in log_outputs.items()}
             tb_log['training/lr'] = self.lr_schedulers().get_last_lr()[0]
             self.logger.log_metrics(tb_log, step=self.global_step)
+            
+        if "ep" not in str(hparams['val_check_interval']):
+            self.logger.log_metrics({'epoch/current_epoch': self.current_epoch}, step=self.global_step)
+
 
         return total_loss
 
@@ -324,7 +330,7 @@ class BaseTask(pl.LightningModule):
         optimizer = build_object_from_class_name(
             optimizer_args['optimizer_cls'],
             torch.optim.Optimizer,
-            model.parameters(),
+            model if optimizer_args['optimizer_cls'] == 'modules.optimizer.muon.Muon_AdamW' else model.parameters(),
             **optimizer_args
         )
         return optimizer
@@ -412,6 +418,22 @@ class BaseTask(pl.LightningModule):
         #     print("load success-------------------------------------------------------------------")
 
         work_dir = pathlib.Path(hparams['work_dir'])
+        
+        if "ep" in str(hparams['val_check_interval']):
+            val_check_interval = hparams['val_check_interval'].replace('ep', '')
+            val_check_interval_ep = int(val_check_interval) * hparams['accumulate_grad_batches']
+            val_check_interval_steps = None
+        else:
+            val_check_interval_steps = hparams['val_check_interval']
+            val_check_interval_ep = None
+            
+        if "ep" in str(hparams['max_updates']):
+            max_updates_ep = int(hparams['max_updates'].replace('ep', ''))
+            max_updates_steps = 2147483647
+        else:
+            max_updates_steps = hparams['max_updates']
+            max_updates_ep = 2147483647
+
         trainer = pl.Trainer(
             accelerator=hparams['pl_trainer_accelerator'],
             devices=hparams['pl_trainer_devices'],
@@ -447,11 +469,12 @@ class BaseTask(pl.LightningModule):
                 version='latest'
             ),
             gradient_clip_val=hparams['clip_grad_norm'],
-            val_check_interval=hparams['val_check_interval'] * hparams['accumulate_grad_batches'],
+            val_check_interval=val_check_interval_steps,  # could be float (fraction of epoch) or int (number of steps)
             # so this is global_steps
-            check_val_every_n_epoch=None,
+            check_val_every_n_epoch=val_check_interval_ep,
             log_every_n_steps=1,
-            max_steps=hparams['max_updates'],
+            max_steps=max_updates_steps,
+            max_epochs=max_updates_ep,
             use_distributed_sampler=False,
             num_sanity_val_steps=hparams['num_sanity_val_steps'],
             accumulate_grad_batches=hparams['accumulate_grad_batches']

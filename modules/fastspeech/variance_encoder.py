@@ -32,7 +32,8 @@ class FastSpeech2Variance(nn.Module):
             hidden_size=hparams['hidden_size'], num_layers=hparams['enc_layers'],
             ffn_kernel_size=hparams['enc_ffn_kernel_size'], ffn_act=hparams['ffn_act'],
             dropout=hparams['dropout'], num_heads=hparams['num_heads'],
-            use_pos_embed=hparams['use_pos_embed'], rel_pos=hparams['rel_pos']
+            use_pos_embed=hparams['use_pos_embed'], rel_pos=hparams.get('rel_pos', False), 
+            use_rope=hparams.get('use_rope', False)
         )
 
         dur_hparams = hparams['dur_prediction_args']
@@ -45,7 +46,8 @@ class FastSpeech2Variance(nn.Module):
                 dropout_rate=dur_hparams['dropout'],
                 kernel_size=dur_hparams['kernel_size'],
                 offset=dur_hparams['log_offset'],
-                dur_loss_type=dur_hparams['loss_type']
+                dur_loss_type=dur_hparams['loss_type'],
+                arch=dur_hparams['arch']
             )
 
     def forward(
@@ -121,7 +123,8 @@ class MelodyEncoder(nn.Module):
             hidden_size=hidden_size, num_layers=get_hparam('enc_layers'),
             ffn_kernel_size=get_hparam('enc_ffn_kernel_size'), ffn_act=get_hparam('ffn_act'),
             dropout=get_hparam('dropout'), num_heads=get_hparam('num_heads'),
-            use_pos_embed=get_hparam('use_pos_embed'), rel_pos=get_hparam('rel_pos')
+            use_pos_embed=get_hparam('use_pos_embed'), rel_pos=get_hparam('rel_pos'),
+            use_rope=get_hparam('use_rope')
         )
         self.out_proj = Linear(hidden_size, hparams['hidden_size'])
 

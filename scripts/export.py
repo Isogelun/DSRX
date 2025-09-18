@@ -22,8 +22,8 @@ def check_pytorch_version():
 
 
 def find_exp(exp):
-    if not (root_dir / 'checkpoints' / exp).exists():
-        for subdir in (root_dir / 'checkpoints').iterdir():
+    if not (root_dir / 'ckpt' / exp).exists():
+        for subdir in (root_dir / 'ckpt').iterdir():
             if not subdir.is_dir():
                 continue
             if subdir.name.startswith(exp):
@@ -32,7 +32,7 @@ def find_exp(exp):
                 break
         else:
             raise click.BadParameter(
-                f'There are no matching exp starting with \'{exp}\' in \'checkpoints\' folder. '
+                f'There are no matching exp starting with \'{exp}\' in \'ckpt\' folder. '
                 'Please specify \'--exp\' as the folder name or prefix.'
             )
     else:
