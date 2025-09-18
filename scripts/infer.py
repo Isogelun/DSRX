@@ -64,7 +64,7 @@ def main():
 @click.option(
     '--lang', type=click.STRING,
     required=False,
-    help='Default language name'
+    help='Default language name or "auto" for phoneme tags'
 )
 @click.option(
     '--out', type=click.Path(
@@ -251,7 +251,7 @@ def acoustic(
 @click.option(
     '--lang', type=click.STRING,
     required=False,
-    help='Default language name'
+    help='Default language name or "auto" for phoneme tags'
 )
 @click.option(
     '--out', type=click.Path(

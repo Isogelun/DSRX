@@ -2,7 +2,7 @@
 import numpy as np
 import torch
 from torch import Tensor
-from typing import Tuple, Dict
+from typing import Dict, List, Optional, Tuple
 
 from utils.hparams import hparams
 from utils.infer_utils import resample_align_curve
@@ -125,6 +125,60 @@ class BaseSVSInfer:
                                            f'Proportions of speaker mix sum to zero.'
             spk_mix_value /= spk_mix_value_sum  # normalize
         return spk_mix_id, spk_mix_value
+
+    def _resolve_language_config(
+            self, tokens: List[str], lang_value: str
+    ) -> Tuple[Optional[str], List[Optional[str]]]:
+        """Resolve default and per-phoneme language tags."""
+        reserved = {'AP', 'SP'}
+        auto_mode = lang_value == 'auto'
+        resolved_lang = None if auto_mode else lang_value
+        per_token_langs: List[Optional[str]] = []
+
+        if auto_mode:
+            missing = None
+            for token in tokens:
+                if token in reserved:
+                    per_token_langs.append(None)
+                    continue
+                if '/' not in token:
+                    if missing is None:
+                        missing = token
+                    per_token_langs.append(None)
+                    continue
+                lang_name = token.split('/', maxsplit=1)[0]
+                if self.lang_map:
+                    assert lang_name in self.lang_map, (
+                        f"Auto language detection failed: phoneme '{token}' uses unknown language '{lang_name}'."
+                    )
+                per_token_langs.append(lang_name)
+            if missing is not None:
+                raise AssertionError(
+                    "Auto language detection requires language tags for all non-AP/SP phonemes in ph_seq. "
+                    f"Missing language tag near '{missing}'."
+                )
+        else:
+            if lang_value is None:
+                assert len(self.lang_map) <= 1, (
+                    "This is a multilingual model. "
+                    "Please specify a language by --lang option."
+                )
+            else:
+                assert lang_value in self.lang_map, f"Unrecognized language name: '{lang_value}'."
+            for token in tokens:
+                if token in reserved:
+                    per_token_langs.append(None)
+                    continue
+                if '/' in token:
+                    lang_name = token.split('/', maxsplit=1)[0]
+                    if self.lang_map:
+                        assert lang_name in self.lang_map, (
+                            f"Phoneme '{token}' uses unknown language '{lang_name}'."
+                        )
+                    per_token_langs.append(lang_name)
+                else:
+                    per_token_langs.append(lang_value)
+        return resolved_lang, per_token_langs
 
     def preprocess_input(self, param: dict, idx=0) -> Dict[str, torch.Tensor]:
         raise NotImplementedError()
