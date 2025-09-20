@@ -1,8 +1,6 @@
-# DiffSinger (OpenVPI maintained version)
+# DiffSinger (Kouon Project forked from OpenVPI maintained 2024-11 ver.)
 
 [![arXiv](https://img.shields.io/badge/arXiv-Paper-<COLOR>.svg)](https://arxiv.org/abs/2105.02446)
-[![downloads](https://img.shields.io/github/downloads/openvpi/DiffSinger/total.svg)](https://github.com/openvpi/DiffSinger/releases)
-[![Bilibili](https://img.shields.io/badge/Bilibili-Demo-blue)](https://www.bilibili.com/video/BV1be411N7JA/)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/openvpi/DiffSinger/blob/main/LICENSE)
 
 This is a refactored and enhanced version of _DiffSinger: Singing Voice Synthesis via Shallow Diffusion Mechanism_ based on the original [paper](https://arxiv.org/abs/2105.02446) and [implementation](https://github.com/MoonInTheRiver/DiffSinger), which provides:
@@ -19,20 +17,7 @@ This is a refactored and enhanced version of _DiffSinger: Singing Voice Synthesi
 
 ## User Guidance
 
-> 中文教程 / Chinese Tutorials: [Text](https://openvpi-docs.feishu.cn/wiki/KmBFwoYDEixrS4kHcTAcajPinPe), [Video](https://space.bilibili.com/179281251/channel/collectiondetail?sid=1747910)
-
-- **Installation & basic usages**: See [Getting Started](docs/GettingStarted.md)
-- **Dataset creation pipelines & tools**: See [MakeDiffSinger](https://github.com/openvpi/MakeDiffSinger)
-- **Best practices & tutorials**: See [Best Practices](docs/BestPractices.md)
-- **Editing configurations**: See [Configuration Schemas](docs/ConfigurationSchemas.md)
-- **Deployment & production**: [OpenUTAU for DiffSinger](https://github.com/xunmengshe/OpenUtau), [DiffScope (under development)](https://github.com/openvpi/diffscope)
-- **Communication groups**: [QQ Group](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=fibG_dxuPW5maUJwe9_ya5-zFcIwaoOR&authKey=ZgLCG5EqQVUGCID1nfKei8tCnlQHAmD9koxebFXv5WfUchhLwWxb52o1pimNai5A&noverify=0&group_code=907879266) (907879266), [Discord server](https://discord.gg/wwbu2JUMjj)
-
-## Progress & Roadmap
-
-- **Progress since we forked into this repository**: See [Releases](https://github.com/openvpi/DiffSinger/releases)
-- **Roadmap for future releases**: See [Project Board](https://github.com/orgs/openvpi/projects/1)
-- **Thoughts, proposals & ideas**: See [Discussions](https://github.com/openvpi/DiffSinger/discussions)
+Still Working...
 
 ## Architecture & Algorithms
 
@@ -65,6 +50,9 @@ TBD
 - [pc-ddsp](https://github.com/yxlllc/pc-ddsp) for waveform reconstruction
 - [RMVPE](https://github.com/Dream-High/RMVPE) and yxlllc's [fork](https://github.com/yxlllc/RMVPE) for pitch extraction
 - [Vocal Remover](https://github.com/tsurumeso/vocal-remover) and yxlllc's [fork](https://github.com/yxlllc/vocal-remover) for harmonic-noise separation
+
+In this fork:
+- [LoRA](https://arxiv.org/abs/2106.09685) for LoRA-finetuning
 
 ## Disclaimer
 
