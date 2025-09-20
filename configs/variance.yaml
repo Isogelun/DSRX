@@ -236,7 +236,6 @@ lora:
   base_ckpt: ""
   train_bias: false
   merge_before_export: true
-  - model.fs2.encoder.embed_tokens
 finetune_strict_shapes: true
 
 freezing_enabled: false

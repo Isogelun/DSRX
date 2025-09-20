@@ -111,6 +111,6 @@ pl_trainer_precision: bf16-mixed
 finetune_ckpt_path: pretrained/var.ckpt
 finetune_enabled: true
 finetune_ignored_params:
-- model.fs2.spk_embed
-- model.fs2.variance_embeds.energy
+- model.spk_embed
+- model.variance_embeds.energy
 finetune_strict_shapes: true
