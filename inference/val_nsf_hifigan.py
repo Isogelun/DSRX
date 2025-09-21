@@ -16,7 +16,7 @@ from utils.hparams import set_hparams, hparams
 sys.argv = [
     'inference/svs/ds_acoustic.py',
     '--config',
-    'configs/acoustic.yaml',
+    'configs/original/acoustic.yaml',
 ]
 
 
