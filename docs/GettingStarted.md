@@ -20,7 +20,7 @@ Some essential materials and assets are needed before continuing with this repos
 
 ## Configuration
 
-Every model needs a configuration file to run preprocessing, training, inference and deployment. Templates of configurations files are in [configs/original/templates](../configs/original/templates). Please **copy** the templates to your own data directory before you edit them.
+Every model needs a configuration file to run preprocessing, training, inference and deployment. Templates of configurations files are in [configs/templates](../configs/templates). Templates of fine-tuning configurations are in [configs/finetune_templates](../configs/finetune_templates). Please **copy** the templates to your own data directory before you edit them.
 
 Before you continue, it is highly recommended to read through [Best Practices](BestPractices.md), which is a more detailed tutorial on how to configure your experiments.
 
