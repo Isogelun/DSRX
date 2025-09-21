@@ -1,5 +1,5 @@
 base_config:
-- configs/variance.yaml
+- configs/original/variance.yaml
 dictionaries:
   en: data/pre/dictionaries/en.txt
   ja: data/pre/dictionaries/ja.txt

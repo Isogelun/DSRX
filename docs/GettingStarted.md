@@ -20,7 +20,7 @@ Some essential materials and assets are needed before continuing with this repos
 
 ## Configuration
 
-Every model needs a configuration file to run preprocessing, training, inference and deployment. Templates of configurations files are in [configs/templates](../configs/templates). Please **copy** the templates to your own data directory before you edit them.
+Every model needs a configuration file to run preprocessing, training, inference and deployment. Templates of configurations files are in [configs/templates](../configs/templates). Templates of fine-tuning configurations are in [configs/finetune_templates](../configs/finetune_templates). Please **copy** the templates to your own data directory before you edit them.
 
 Before you continue, it is highly recommended to read through [Best Practices](BestPractices.md), which is a more detailed tutorial on how to configure your experiments.
 
@@ -148,7 +148,7 @@ To export an NSF-HiFiGAN vocoder checkpoint, run:
 python scripts/export.py nsf-hifigan --config CONFIG --ckpt CKPT
 ```
 
-where `CONFIG` is a configuration file that has configured the same mel parameters as the vocoder (can be configs/acoustic.yaml for most cases) and `CKPT` is the path of the checkpoint to be exported.
+where `CONFIG` is a configuration file that has configured the same mel parameters as the vocoder (can be configs/original/acoustic.yaml for most cases) and `CKPT` is the path of the checkpoint to be exported.
 
 For more configurable options, run
 

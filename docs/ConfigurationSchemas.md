@@ -2,7 +2,7 @@
 
 ## The configuration system
 
-DiffSinger uses a cascading configuration system based on YAML files. All configuration files originally inherit and override [configs/base.yaml](../configs/base.yaml), and each file directly override another file by setting the `base_config` attribute. The overriding rules are:
+DiffSinger uses a cascading configuration system based on YAML files. All configuration files originally inherit and override [configs/original/base.yaml](../configs/original/base.yaml), and each file directly override another file by setting the `base_config` attribute. The overriding rules are:
 
 - Configuration keys with the same path and the same name will be replaced. Other paths and names will be merged.
 - All configurations in the inheritance chain will be squashed (via the rule above) as the final configuration.
