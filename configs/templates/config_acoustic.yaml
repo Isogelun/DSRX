@@ -1,5 +1,5 @@
 base_config:
-  - configs/acoustic.yaml
+  - configs/original/acoustic.yaml
 
 dictionaries:
   zh: dictionaries/opencpop-extension.txt

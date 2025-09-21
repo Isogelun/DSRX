@@ -1,5 +1,5 @@
 base_config:
-  - configs/base.yaml
+  - configs/original/base.yaml
 
 task_cls: training.acoustic_task.AcousticTask
 
