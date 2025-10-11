@@ -14,15 +14,50 @@ class PhonemeDictionary:
             extra_phonemes: List[str] = None,
             merged_groups: List[List[str]] = None
     ):
-        all_phonemes = {'AP', 'SP'}
+        """
+        初始化音素词典，构建多语言音素索引系统。
+
+        参数:
+            dictionaries (Dict[str, pathlib.Path]): 语言名称到字典文件路径的映射。每个字典文件应为制表符分隔的文本文件，
+                                                   每行格式为 "word phoneme1 phoneme2 ..."。
+            extra_phonemes (List[str], optional): 额外添加的音素列表。支持使用 "language/phoneme" 格式指定语言特定音素。
+                                                 默认为 None。
+            merged_groups (List[List[str]], optional): 需要合并的音素组列表，每组中的音素将被视为等价。
+                                                      支持使用 "language/phoneme" 格式指定语言特定音素。
+                                                      默认为 None。
+
+        异常:
+            ValueError: 当音素标签格式错误、语言名称未识别或音素冲突时抛出。
+        """
+        # Step 1: Collect all phonemes
+        all_phonemes = hparams.get('all_phonemes')
+        if all_phonemes:
+            all_phonemes = set(all_phonemes)
+        else:
+            all_phonemes = {'AP', 'SP'}
+
+        lang_phoneme_separator = hparams.get('lang_phoneme_separator', '/')
+        if isinstance(lang_phoneme_separator, (list, tuple, set)):
+            separator = next(iter(lang_phoneme_separator))  # 取第一个作为主分隔符
+        else:
+            separator = lang_phoneme_separator
+        self._separator = separator  # 保存到实例，供后续使用
+
+        # Step 2: Parse extra phonemes
+
         if extra_phonemes:
             for ph in extra_phonemes:
-                if '/' in ph:
-                    lang, name = ph.split('/', maxsplit=1)
+                if self._separator in ph:
+                    lang, name = ph.split(self._separator, maxsplit=1)
                     if lang not in dictionaries:
                         raise ValueError(
                             f"Invalid phoneme tag '{ph}' in extra phonemes: "
                             f"unrecognized language name '{lang}'."
+                        )
+                    if name in all_phonemes:
+                        raise ValueError(
+                            f"Invalid phoneme tag '{ph}' in extra phonemes: "
+                            f"short name conflicts with existing tag."
                         )
                 all_phonemes.add(ph)
         self._multi_langs = len(dictionaries) > 1
@@ -32,10 +67,10 @@ class PhonemeDictionary:
                     _, phonemes = line.strip().split('\t')
                     phonemes = phonemes.split()
                     for phoneme in phonemes:
-                        if '/' in phoneme:
+                        if self._separator in phoneme:
                             raise ValueError(
                                 f"Invalid phoneme tag '{phoneme}' in dictionary '{dict_path}': "
-                                f"should not contain the reserved character '/'."
+                                f"should not contain the reserved character '{self._separator}'."
                             )
                         if phoneme in all_phonemes:
                             continue
@@ -43,47 +78,36 @@ class PhonemeDictionary:
                             all_phonemes.add(f'{lang}/{phoneme}')
                         else:
                             all_phonemes.add(phoneme)
+        # Step 2: Parse merged phoneme groups
         if merged_groups is None:
             merged_groups = []
         else:
-            if self._multi_langs:
-                for group in merged_groups:
-                    for phoneme in group:
-                        if '/' not in phoneme:
-                            raise ValueError(
-                                f"Invalid phoneme tag '{phoneme}' in merged group: "
-                                "should specify language by '<lang>/' prefix."
-                            )
-                        lang, name = phoneme.split('/', maxsplit=1)
+            _merged_groups = []
+            for group in merged_groups:
+                _group = []
+                for phoneme in group:
+                    if self._separator in phoneme:
+                        lang, name = phoneme.split(self._separator, maxsplit=1)
                         if lang not in dictionaries:
                             raise ValueError(
                                 f"Invalid phoneme tag '{phoneme}' in merged group: "
                                 f"unrecognized language name '{lang}'."
                             )
-                        unique_name = phoneme if self._multi_langs else name
-                        if unique_name not in all_phonemes:
-                            raise ValueError(
-                                f"Invalid phoneme tag '{phoneme}' in merged group: "
-                                f"not found in phoneme set."
-                            )
-                merged_groups = [set(phones) for phones in merged_groups if len(phones) > 1]
-            else:
-                _merged_groups = []
-                for group in merged_groups:
-                    _group = []
-                    for phoneme in group:
-                        if '/' in phoneme:
-                            lang, name = phoneme.split('/', maxsplit=1)
-                            if lang not in dictionaries:
-                                raise ValueError(
-                                    f"Invalid phoneme tag '{phoneme}' in merged group: "
-                                    f"unrecognized language name '{lang}'."
-                                )
-                            _group.append(name)
+                        if self._multi_langs:
+                            element = phoneme
                         else:
-                            _group.append(phoneme)
-                    _merged_groups.append(_group)
-                merged_groups = [set(phones) for phones in _merged_groups if len(phones) > 1]
+                            element = name
+                    else:
+                        element = phoneme
+                    if element not in all_phonemes:
+                        raise ValueError(
+                            f"Invalid phoneme tag '{phoneme}' in merged group: "
+                            f"not found in phoneme set."
+                        )
+                    _group.append(element)
+                _merged_groups.append(_group)
+            merged_groups = [set(phones) for phones in _merged_groups if len(phones) > 1]
+        # Step 3: Build phoneme index
         merged_phonemes_inverted_index = {}
         for idx, group in enumerate(merged_groups):
             other_idx = None
@@ -111,13 +135,13 @@ class PhonemeDictionary:
                 if not has_assigned:
                     merged_group = sorted(merged_groups[merged_phonemes_inverted_index[phoneme]])
                     merged_from_langs = {
-                        (alias.split('/', maxsplit=1)[0] if '/' in alias else None)
+                        (alias.split(self._separator, maxsplit=1)[0] if self._separator in alias else None)
                         for alias in merged_group
                     }
                     id_to_phone.append(tuple(merged_group))
                     idx += 1
                     if len(merged_from_langs) > 1:
-                        cross_lingual_phonemes.update(ph for ph in merged_group if '/' in ph)
+                        cross_lingual_phonemes.update(ph for ph in merged_group if self._separator in ph)
             else:
                 phone_to_id[phoneme] = idx
                 id_to_phone.append(phoneme)
@@ -141,10 +165,28 @@ class PhonemeDictionary:
         return phone in self._cross_lingual_phonemes
 
     def encode_one(self, phone, lang=None):
+        """
+        将单个音素编码为ID。
+        
+        如果输入的音素已经包含语言标识（通过'/'分隔），则会拆分出语言和音素部分。
+        如果是多语言模式且音素不在通用音素列表中，则会根据指定语言创建语言特定的音素标识。
+        
+        Args:
+            phone (str): 音素字符串，可能包含语言前缀
+            lang (str, optional): 语言标识，当phone中不包含语言信息时使用
+            
+        Returns:
+            int: 对应音素在词典中的ID
+        """
+        # 如果音素中已包含语言标识，则拆分出语言和音素
+        if self._separator in phone:
+            lang, phone = phone.split(self._separator, maxsplit=1)
+        # 如果不需要语言标识或音素已存在于词典中，直接返回ID
         if lang is None or not self._multi_langs or phone in self._phone_to_id:
             return self._phone_to_id[phone]
-        if '/' not in phone:
-            phone = f'{lang}/{phone}'
+        # 如果是多语言模式且音素不包含语言标识，则添加语言前缀
+        if self._separator not in phone:
+            phone = f'{lang}{self._separator}{phone}'
         return self._phone_to_id[phone]
 
     def encode(self, sentence, lang=None):
