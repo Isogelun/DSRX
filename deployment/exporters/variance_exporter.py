@@ -13,6 +13,7 @@ from modules.fastspeech.param_adaptor import VARIANCE_CHECKLIST
 from utils import load_ckpt, onnx_helper, remove_suffix
 from utils.hparams import hparams
 from utils.phoneme_utils import load_phoneme_dictionary
+from deployment.exporters.dsdict_exporter import DsDictExporter
 
 
 class DiffSingerVarianceExporter(BaseExporter):
@@ -171,6 +172,11 @@ class DiffSingerVarianceExporter(BaseExporter):
             )
         self.export_dictionaries(path)
         self._export_phonemes(path)
+
+        # 导出dsdict文件
+        dsdict_exporter = DsDictExporter()
+        dsdict_path = path / f'{self.model_name}.dsdict.yaml'
+        dsdict_exporter.export(dsdict_path)
 
         model_name = self.model_name
         if self.freeze_spk is not None:

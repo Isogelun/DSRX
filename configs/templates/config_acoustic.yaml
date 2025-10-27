@@ -38,7 +38,7 @@ pe_ckpt: 'ckpt/rmvpe/model.pt'
 hnsep: vr
 hnsep_ckpt: 'ckpt/vr/model.pt'
 vocoder: NsfHifiGAN
-vocoder_ckpt: ckpt/nsf_hifigan_44.1k_hop512_128bin_2024.02/model.ckpt
+vocoder_ckpt: ckpt/kouon_pc_mini_nsf-hifigan_1028/kouon_pc_mini_nsf-hifigan_1028_44100hz_512hop_128bin.ckpt
 
 use_lang_id: false
 num_lang: 1

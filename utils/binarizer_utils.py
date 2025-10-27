@@ -189,13 +189,18 @@ def get_tension_base_harmonic(
         )
     waveform_h = waveform.harmonic()
     waveform_base_h = waveform.harmonic(0)
+
+    waveform_low_h = sum(waveform.harmonic(i) for i in range(1, 30))
+    waveform_high_h = waveform_h - waveform_low_h
+    waveform_o = waveform_h -  waveform_high_h
+
     energy_base_h = get_energy_librosa(
         waveform_base_h, length,
         hop_size=waveform.hop_size, win_size=waveform.win_size,
         domain='amplitude'
     )
     energy_h = get_energy_librosa(
-        waveform_h, length,
+        waveform_o, length,
         hop_size=waveform.hop_size, win_size=waveform.win_size,
         domain='amplitude'
     )
