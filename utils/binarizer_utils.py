@@ -10,6 +10,7 @@ from utils.decomposed_waveform import DecomposedWaveform
 from utils.pitch_utils import interp_f0
 
 
+#模型输入mel谱部分
 def get_mel_torch(
         waveform, samplerate,
         *,
@@ -23,6 +24,40 @@ def get_mel_torch(
     with torch.no_grad():
         wav_torch = torch.from_numpy(waveform).to(device)
         mel_torch = stft.get_mel(wav_torch.unsqueeze(0), keyshift=keyshift, speed=speed).squeeze(0).T
+        torch.cuda.empty_cache()
+        return mel_torch.cpu().numpy()
+
+def get_harmonic_torch(
+        waveform, samplerate,
+        *,
+        num_mel_bins=128, hop_size=512, win_size=2048, fft_size=2048,
+        fmin=40, fmax=16000,
+        keyshift=0, speed=1, device=None
+):
+    if device is None:
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    stft = STFT(samplerate, num_mel_bins, fft_size, win_size, hop_size, fmin, fmax, device=device)
+    with torch.no_grad():
+        harmonic_wave = waveform.harmonic()
+        harmonic_wave_torch_h = torch.from_numpy(harmonic_wave).to(device)
+        mel_torch = stft.get_mel(harmonic_wave_torch_h.unsqueeze(0), keyshift=keyshift, speed=speed).squeeze(0).T
+        torch.cuda.empty_cache()
+        return mel_torch.cpu().numpy()
+
+def get_aperiodic_torch(
+        waveform, samplerate,
+        *,
+        num_mel_bins=128, hop_size=512, win_size=2048, fft_size=2048,
+        fmin=40, fmax=16000,
+        keyshift=0, speed=1, device=None
+):
+    if device is None:
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    stft = STFT(samplerate, num_mel_bins, fft_size, win_size, hop_size, fmin, fmax, device=device)
+    with torch.no_grad():
+        aperiodic_wave = waveform.aperiodic()
+        aperiodic_wave_torch_h = torch.from_numpy(aperiodic_wave).to(device)
+        mel_torch = stft.get_mel( aperiodic_wave_torch_h.unsqueeze(0), keyshift=keyshift, speed=speed).squeeze(0).T
         torch.cuda.empty_cache()
         return mel_torch.cpu().numpy()
 

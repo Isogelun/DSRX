@@ -84,6 +84,12 @@ main_loss_type: l2
 main_loss_log_norm: false
 schedule_type: 'linear'
 
+# harmonic and aperiodic mel settings
+harmonic_loss_type: l2
+harmonic_loss_log_norm: false
+aperiodic_loss_type: l2
+aperiodic_loss_log_norm: false
+
 # shallow diffusion
 use_shallow_diffusion: true
 T_start: 0.4
@@ -104,6 +110,8 @@ shallow_diffusion_args:
   aux_decoder_grad: 0.1
 
 lambda_aux_mel_loss: 0.2
+lambda_harmonic_loss: 0.5
+lambda_aperiodic_loss: 0.5
 
 # train and eval
 num_sanity_val_steps: 1

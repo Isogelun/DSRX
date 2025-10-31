@@ -260,12 +260,15 @@ class DiffSingerAcousticInfer(BaseSVSInfer):
         else:
             spk_mix_embed = None
         mel_pred: ShallowDiffusionOutput = self.model(
-            txt_tokens,  languages=sample.get('languages'),
+            txt_tokens, languages=sample.get('languages'),
             mel2ph=sample['mel2ph'], f0=sample['f0'], **variances,
             key_shift=sample.get('key_shift'), speed=sample.get('speed'),
             spk_mix_embed=spk_mix_embed,
             infer=True
         )
+        # Return combined mel if shallow diffusion is used
+        if self.model.use_shallow_diffusion:
+            return mel_pred.diff_out
         return mel_pred.diff_out
 
     @torch.no_grad()

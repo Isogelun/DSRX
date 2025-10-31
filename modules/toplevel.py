@@ -28,7 +28,6 @@ class ShallowDiffusionOutput:
         self.aux_out = aux_out
         self.diff_out = diff_out
 
-
 class DiffSingerAcoustic(CategorizedModule, ParameterAdaptorModule):
     @property
     def category(self):
@@ -57,7 +56,7 @@ class DiffSingerAcoustic(CategorizedModule, ParameterAdaptorModule):
         self.backbone_type = compat.get_backbone_type(hparams)
         self.backbone_args = compat.get_backbone_args(hparams, self.backbone_type)
         if self.diffusion_type == 'ddpm':
-            self.diffusion = GaussianDiffusion(
+            self.diffusion = RectifiedFlow(
                 out_dims=out_dims,
                 num_feats=1,
                 timesteps=hparams['timesteps'],
@@ -67,6 +66,27 @@ class DiffSingerAcoustic(CategorizedModule, ParameterAdaptorModule):
                 spec_min=hparams['spec_min'],
                 spec_max=hparams['spec_max']
             )
+            self.harmonic_diffusion = GaussianDiffusion(
+                out_dims=out_dims,
+                num_feats=1,
+                timesteps=hparams['timesteps'],
+                k_step=hparams['K_step'],
+                backbone_type=self.backbone_type,
+                backbone_args=self.backbone_args,
+                spec_min=hparams['spec_min'],
+                spec_max=hparams['spec_max']
+            )
+            self.aperiodic_diffusion = GaussianDiffusion(
+                out_dims=out_dims,
+                num_feats=1,
+                timesteps=hparams['timesteps'],
+                k_step=hparams['K_step'],
+                backbone_type=self.backbone_type,
+                backbone_args=self.backbone_args,
+                spec_min=hparams['spec_min'],
+                spec_max=hparams['spec_max']
+            )
+
         elif self.diffusion_type == 'reflow':
             self.diffusion = RectifiedFlow(
                 out_dims=out_dims,
@@ -78,12 +98,33 @@ class DiffSingerAcoustic(CategorizedModule, ParameterAdaptorModule):
                 spec_min=hparams['spec_min'],
                 spec_max=hparams['spec_max']
             )
+            self.harmonic_diffusion = RectifiedFlow(
+                out_dims=out_dims,
+                num_feats=1,
+                timesteps=hparams['timesteps'],
+                k_step=hparams['K_step'],
+                backbone_type=self.backbone_type,
+                backbone_args=self.backbone_args,
+                spec_min=hparams['spec_min'],
+                spec_max=hparams['spec_max']
+            )
+            self.aperiodic_diffusion = RectifiedFlow(
+                out_dims=out_dims,
+                num_feats=1,
+                timesteps=hparams['timesteps'],
+                k_step=hparams['K_step'],
+                backbone_type=self.backbone_type,
+                backbone_args=self.backbone_args,
+                spec_min=hparams['spec_min'],
+                spec_max=hparams['spec_max']
+            )
         else:
             raise NotImplementedError(self.diffusion_type)
 
     def forward(
             self, txt_tokens, mel2ph, f0, key_shift=None, speed=None,
-            spk_embed_id=None, languages=None, gt_mel=None, infer=True, **kwargs
+            spk_embed_id=None, languages=None, gt_mel=None, infer=True, 
+            gt_harmonic_mel=None, gt_aperiodic_mel=None, **kwargs
     ) -> ShallowDiffusionOutput:
         condition = self.fs2(
             txt_tokens, mel2ph, f0, key_shift=key_shift, speed=speed,
@@ -92,6 +133,10 @@ class DiffSingerAcoustic(CategorizedModule, ParameterAdaptorModule):
         )
         if infer:
             if self.use_shallow_diffusion:
+                # Generate harmonic and aperiodic mel separately
+                harmonic_mel = self.harmonic_diffusion(condition, infer=True)
+                aperiodic_mel = self.aperiodic_diffusion(condition, infer=True)
+                combined_mel = harmonic_mel + aperiodic_mel
                 aux_mel_pred = self.aux_decoder(condition, infer=True)
                 aux_mel_pred *= ((mel2ph > 0).float()[:, :, None])
                 if gt_mel is not None and self.shallow_args['val_gt_start']:
