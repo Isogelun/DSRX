@@ -266,7 +266,7 @@ class DiffSingerAcousticInfer(BaseSVSInfer):
             spk_mix_embed=spk_mix_embed,
             infer=True
         )
-        # Return combined mel if shallow diffusion is used
+        # Return combined mel (harmonic + aperiodic) if shallow diffusion is used
         if self.model.use_shallow_diffusion:
             return mel_pred.diff_out
         return mel_pred.diff_out

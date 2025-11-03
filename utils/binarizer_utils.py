@@ -10,7 +10,6 @@ from utils.decomposed_waveform import DecomposedWaveform
 from utils.pitch_utils import interp_f0
 
 
-#模型输入mel谱部分
 def get_mel_torch(
         waveform, samplerate,
         *,

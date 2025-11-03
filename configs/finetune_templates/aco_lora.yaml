@@ -9,7 +9,7 @@ merged_phoneme_groups: []
 lang_phoneme_separator: [/]
 
 datasets:
-  - raw_data_dir: data/xxx1/raw
+  - raw_data_dir: data/xxx1
     speaker: speaker1
     spk_id: 0
     language: zh

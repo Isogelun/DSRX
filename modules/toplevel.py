@@ -24,9 +24,11 @@ from utils.hparams import hparams
 
 
 class ShallowDiffusionOutput:
-    def __init__(self, *, aux_out=None, diff_out=None):
+    def __init__(self, *, aux_out=None, diff_out=None, diff_out_harmonic=None, diff_out_aperiodic=None):
         self.aux_out = aux_out
         self.diff_out = diff_out
+        self.diff_out_harmonic = diff_out_harmonic
+        self.diff_out_aperiodic = diff_out_aperiodic
 
 class DiffSingerAcoustic(CategorizedModule, ParameterAdaptorModule):
     @property
@@ -101,8 +103,8 @@ class DiffSingerAcoustic(CategorizedModule, ParameterAdaptorModule):
             self.harmonic_diffusion = RectifiedFlow(
                 out_dims=out_dims,
                 num_feats=1,
-                timesteps=hparams['timesteps'],
-                k_step=hparams['K_step'],
+                t_start=hparams['T_start'],
+                time_scale_factor=hparams['time_scale_factor'],
                 backbone_type=self.backbone_type,
                 backbone_args=self.backbone_args,
                 spec_min=hparams['spec_min'],
@@ -111,8 +113,8 @@ class DiffSingerAcoustic(CategorizedModule, ParameterAdaptorModule):
             self.aperiodic_diffusion = RectifiedFlow(
                 out_dims=out_dims,
                 num_feats=1,
-                timesteps=hparams['timesteps'],
-                k_step=hparams['K_step'],
+                t_start=hparams['T_start'],
+                time_scale_factor=hparams['time_scale_factor'],
                 backbone_type=self.backbone_type,
                 backbone_args=self.backbone_args,
                 spec_min=hparams['spec_min'],
@@ -133,16 +135,29 @@ class DiffSingerAcoustic(CategorizedModule, ParameterAdaptorModule):
         )
         if infer:
             if self.use_shallow_diffusion:
-                # Generate harmonic and aperiodic mel separately
-                harmonic_mel = self.harmonic_diffusion(condition, infer=True)
-                aperiodic_mel = self.aperiodic_diffusion(condition, infer=True)
-                combined_mel = harmonic_mel + aperiodic_mel
+                # First generate auxiliary mel as source for harmonic and aperiodic diffusion
                 aux_mel_pred = self.aux_decoder(condition, infer=True)
                 aux_mel_pred *= ((mel2ph > 0).float()[:, :, None])
                 if gt_mel is not None and self.shallow_args['val_gt_start']:
                     src_mel = gt_mel
                 else:
                     src_mel = aux_mel_pred
+                
+                # Generate harmonic and aperiodic mel separately using the source mel
+                harmonic_mel = self.harmonic_diffusion(condition, src_spec=src_mel, infer=True)
+                aperiodic_mel = self.aperiodic_diffusion(condition, src_spec=src_mel, infer=True)
+                combined_mel = harmonic_mel + aperiodic_mel
+                
+                # Apply harmonic and aperiodic mel separately
+                harmonic_mel *= ((mel2ph > 0).float()[:, :, None])
+                aperiodic_mel *= ((mel2ph > 0).float()[:, :, None])
+                combined_mel *= ((mel2ph > 0).float()[:, :, None])
+                return ShallowDiffusionOutput(
+                    aux_out=aux_mel_pred, 
+                    diff_out=combined_mel,
+                    diff_out_harmonic=harmonic_mel,
+                    diff_out_aperiodic=aperiodic_mel
+                )
             else:
                 aux_mel_pred = src_mel = None
             mel_pred = self.diffusion(condition, src_spec=src_mel, infer=True)
@@ -157,9 +172,25 @@ class DiffSingerAcoustic(CategorizedModule, ParameterAdaptorModule):
                     aux_out = None
                 if self.train_diffusion:
                     diff_out = self.diffusion(condition, gt_spec=gt_mel, infer=False)
+                    # Train harmonic and aperiodic diffusion separately if data is available
+                    if gt_harmonic_mel is not None:
+                        diff_out_harmonic = self.harmonic_diffusion(condition, gt_spec=gt_harmonic_mel, infer=False)
+                    else:
+                        diff_out_harmonic = None
+                    if gt_aperiodic_mel is not None:
+                        diff_out_aperiodic = self.aperiodic_diffusion(condition, gt_spec=gt_aperiodic_mel, infer=False)
+                    else:
+                        diff_out_aperiodic = None
                 else:
                     diff_out = None
-                return ShallowDiffusionOutput(aux_out=aux_out, diff_out=diff_out)
+                    diff_out_harmonic = None
+                    diff_out_aperiodic = None
+                return ShallowDiffusionOutput(
+                    aux_out=aux_out, 
+                    diff_out=diff_out,
+                    diff_out_harmonic=diff_out_harmonic,
+                    diff_out_aperiodic=diff_out_aperiodic
+                )
 
             else:
                 aux_out = None

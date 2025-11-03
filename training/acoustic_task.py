@@ -46,8 +46,18 @@ class AcousticDataset(BaseDataset):
         f0 = utils.collate_nd([s['f0'] for s in samples], 0.0)
         mel2ph = utils.collate_nd([s['mel2ph'] for s in samples], 0)
         mel = utils.collate_nd([s['mel'] for s in samples], 0.0)
-        harmonic_mel = utils.collate_nd([s['harmonic_mel'] for s in samples], 0.0)
-        aperiodic_mel = utils.collate_nd([s['aperiodic_mel'] for s in samples], 0.0)
+        
+        # Handle harmonic and aperiodic mel data (fallback to full mel if not available)
+        if 'harmonic_mel' in samples[0]:
+            harmonic_mel = utils.collate_nd([s['harmonic_mel'] for s in samples], 0.0)
+        else:
+            harmonic_mel = mel.clone()  # Use full mel as fallback
+            
+        if 'aperiodic_mel' in samples[0]:
+            aperiodic_mel = utils.collate_nd([s['aperiodic_mel'] for s in samples], 0.0)
+        else:
+            aperiodic_mel = mel.clone()  # Use full mel as fallback
+            
         batch.update({
             'tokens': tokens,
             'mel2ph': mel2ph,
@@ -119,8 +129,19 @@ class AcousticTask(BaseTask):
         else:
             raise ValueError(f"Unknown diffusion type: {self.diffusion_type}")
         self.register_validation_loss('mel_loss')
-        self.harmonic_mel_loss = DiffusionLoss(loss_type=hparams['harmonic_loss_type'])
-        self.aperiodic_mel_loss = DiffusionLoss(loss_type=hparams['aperiodic_loss_type'])
+        # Build harmonic and aperiodic diffusion losses
+        if self.diffusion_type == 'ddpm':
+            self.harmonic_mel_loss = DiffusionLoss(loss_type=hparams.get('harmonic_loss_type', 'l1'))
+            self.aperiodic_mel_loss = DiffusionLoss(loss_type=hparams.get('aperiodic_loss_type', 'l1'))
+        elif self.diffusion_type == 'reflow':
+            self.harmonic_mel_loss = RectifiedFlowLoss(
+                loss_type=hparams.get('harmonic_loss_type', 'l1'),
+                log_norm=hparams.get('harmonic_loss_log_norm', False)
+            )
+            self.aperiodic_mel_loss = RectifiedFlowLoss(
+                loss_type=hparams.get('aperiodic_loss_type', 'l1'),
+                log_norm=hparams.get('aperiodic_loss_log_norm', False)
+            )
         self.register_validation_loss('harmonic_mel_loss')
         self.register_validation_loss('aperiodic_mel_loss')
 
@@ -170,27 +191,35 @@ class AcousticTask(BaseTask):
                 if self.diffusion_type == 'ddpm':
                     x_recon, x_noise = output.diff_out
                     mel_loss = self.mel_loss(x_recon, x_noise, non_padding=non_padding)
-                    harmonic_mel_loss = self.harmonic_mel_loss(output.diff_out_harmonic,
-                                                               output.diff_out_harmonic_noise,
-                                                               non_padding=non_padding)
-                    aperiodic_mel_loss = self.aperiodic_mel_loss(output.diff_out_aperiodic,
-                                                                 output.diff_out_aperiodic_noise,
-                                                                 non_padding=non_padding)
+                    
+                    # Handle harmonic and aperiodic diffusion losses only if available
+                    if output.diff_out_harmonic is not None:
+                        harmonic_recon, harmonic_noise = output.diff_out_harmonic
+                        harmonic_mel_loss = self.harmonic_mel_loss(harmonic_recon, harmonic_noise, non_padding=non_padding)
+                        losses['harmonic_mel_loss'] = harmonic_mel_loss
+                    
+                    if output.diff_out_aperiodic is not None:
+                        aperiodic_recon, aperiodic_noise = output.diff_out_aperiodic
+                        aperiodic_mel_loss = self.aperiodic_mel_loss(aperiodic_recon, aperiodic_noise, non_padding=non_padding)
+                        losses['aperiodic_mel_loss'] = aperiodic_mel_loss
 
                 elif self.diffusion_type == 'reflow':
                     v_pred, v_gt, t = output.diff_out
                     mel_loss = self.mel_loss(v_pred, v_gt, t=t, non_padding=non_padding)
-                    harmonic_mel_loss = self.harmonic_mel_loss(output.diff_out_harmonic_pred,
-                                                               output.diff_out_harmonic_gt, t=t,
-                                                               non_padding=non_padding)
-                    aperiodic_mel_loss = self.aperiodic_mel_loss(output.diff_out_aperiodic_pred,
-                                                                 output.diff_out_aperiodic_gt, t=t,
-                                                                 non_padding=non_padding)
+                    
+                    # Handle harmonic and aperiodic diffusion losses only if available
+                    if output.diff_out_harmonic is not None:
+                        harmonic_pred, harmonic_gt, harmonic_t = output.diff_out_harmonic
+                        harmonic_mel_loss = self.harmonic_mel_loss(harmonic_pred, harmonic_gt, t=harmonic_t, non_padding=non_padding)
+                        losses['harmonic_mel_loss'] = harmonic_mel_loss
+                    
+                    if output.diff_out_aperiodic is not None:
+                        aperiodic_pred, aperiodic_gt, aperiodic_t = output.diff_out_aperiodic
+                        aperiodic_mel_loss = self.aperiodic_mel_loss(aperiodic_pred, aperiodic_gt, t=aperiodic_t, non_padding=non_padding)
+                        losses['aperiodic_mel_loss'] = aperiodic_mel_loss
                 else:
                     raise ValueError(f"Unknown diffusion type: {self.diffusion_type}")
                 losses['mel_loss'] = mel_loss
-                losses['harmonic_mel_loss'] = harmonic_mel_loss
-                losses['aperiodic_mel_loss'] = aperiodic_mel_loss
 
             return losses
 
