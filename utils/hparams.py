@@ -21,8 +21,9 @@ class Args:
 
 def override_config(old_config: dict, new_config: dict):
     for k, v in new_config.items():
-        if isinstance(v, dict) and k in old_config:
-            override_config(old_config[k], new_config[k])
+        old_value = old_config.get(k)
+        if isinstance(v, dict) and isinstance(old_value, dict):
+            override_config(old_value, v)
         else:
             old_config[k] = v
 

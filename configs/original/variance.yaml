@@ -29,6 +29,7 @@ use_lang_id: true
 num_lang: 2
 use_spk_id: true
 enc_ffn_kernel_size: 3
+enc_attention_type: normal
 use_rope: true
 num_spk: 14
 predict_dur: false

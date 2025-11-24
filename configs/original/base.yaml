@@ -29,6 +29,7 @@ use_pos_embed: true
 enc_layers: 4
 num_heads: 2
 enc_ffn_kernel_size: 3
+enc_attention_type: normal
 ffn_act: gelu
 use_spk_id: false
 

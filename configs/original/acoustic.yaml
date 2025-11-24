@@ -66,6 +66,7 @@ time_scale_factor: 1000
 timesteps: 1000
 max_beta: 0.02
 enc_ffn_kernel_size: 3
+enc_attention_type: normal  # normal or flash, using flash to enable flash attention on FastSpeech2 encoder.
 use_rope: true
 rel_pos: true
 sampling_algorithm: euler

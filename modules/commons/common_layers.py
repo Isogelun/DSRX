@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import math
-import numpy as np
 
 import torch
 import torch.nn.functional as F
@@ -10,6 +9,12 @@ from torch import nn
 from torch.nn import LayerNorm, MultiheadAttention, ReLU, GELU, SiLU
 
 import utils
+
+try:
+    from torch.onnx import is_in_onnx_export
+except ImportError:  # pragma: no cover - older torch versions
+    def is_in_onnx_export() -> bool:
+        return False
 
 
 class NormalInitEmbedding(torch.nn.Embedding):
@@ -171,13 +176,15 @@ class TransformerFFNLayer(nn.Module):
         return x
 
 class MultiheadSelfAttentionWithRoPE(nn.Module):
-    def __init__(self, embed_dim, num_heads, dropout=0.1, bias=False, rotary_embed=None):
+    def __init__(self, embed_dim, num_heads, dropout=0.1, bias=False,
+                 rotary_embed=None, use_flash=False):
         super().__init__()
         assert embed_dim % num_heads == 0, "Embedding dimension must be divisible by number of heads"
         
         self.embed_dim = embed_dim
         self.num_heads = num_heads
         self.head_dim = embed_dim // num_heads
+        self.use_flash = use_flash
         
         # Linear layers for Q, K, V projections
         self.in_proj = nn.Linear(embed_dim, embed_dim * 3, bias=bias)
@@ -185,8 +192,9 @@ class MultiheadSelfAttentionWithRoPE(nn.Module):
         # Final linear layer after concatenation
         self.out_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
         
-        # Dropout layer
-        self.dropout = nn.Dropout(dropout)
+        # Dropout handling
+        self.attn_dropout_p = float(dropout)
+        self.attn_dropout = nn.Dropout(dropout)
 
         # Rotary Embeddings
         self.rotary_embed = rotary_embed
@@ -215,47 +223,82 @@ class MultiheadSelfAttentionWithRoPE(nn.Module):
         if self.rotary_embed is not None:
             Q = self.rotary_embed.rotate_queries_or_keys(Q)
             K = self.rotary_embed.rotate_queries_or_keys(K)
-            
-        # Compute attention scores
-        scores = torch.matmul(Q, K.transpose(-2, -1)) / np.sqrt(self.head_dim)  # (B, H, L, L)
 
-        # Apply key padding mask if provided
-        if key_padding_mask is not None:
-            # Expand mask to match attention scores shape
-            mask = key_padding_mask.unsqueeze(1).unsqueeze(1)  # (B, 1, 1, L)
-            scores = scores.masked_fill(mask == 1, -np.inf)  # Masked positions are set to -inf
+        if self.use_flash:
+            attn_output = self._flash_attention(Q, K, V, key_padding_mask)
+        else:
+            attn_output = self._standard_attention(Q, K, V, key_padding_mask)
 
-        # Compute attention weights
-        attn_weights = F.softmax(scores, dim=-1)  # (B, H, L, L)
-        attn_weights = self.dropout(attn_weights)
-        
-        # Apply attention weights to V
-        attn_output = torch.matmul(attn_weights, V)  # (B, H, L, D)
-        
         # Reshape and concatenate heads
         attn_output = attn_output.transpose(1, 2).contiguous().view(batch_size, seq_len, embed_dim)  # (B, L, C)
-        
+
         # Final linear projection
         output = self.out_proj(attn_output)  # (B, L, C)
-        
+
         return output
+
+    def _flash_attention(self, Q, K, V, key_padding_mask=None):
+        if is_in_onnx_export():
+            return self._standard_attention(Q, K, V, key_padding_mask)
+
+        batch_size = Q.size(0)
+        seq_len = Q.size(2)
+
+        q = Q.reshape(batch_size * self.num_heads, seq_len, self.head_dim)
+        k = K.reshape(batch_size * self.num_heads, seq_len, self.head_dim)
+        v = V.reshape(batch_size * self.num_heads, seq_len, self.head_dim)
+
+        attn_mask = None
+        if key_padding_mask is not None:
+            mask = key_padding_mask.to(torch.bool).unsqueeze(1).expand(batch_size, self.num_heads, seq_len)
+            attn_mask = mask.reshape(batch_size * self.num_heads, 1, seq_len)
+
+        attn_output = F.scaled_dot_product_attention(
+            q, k, v,
+            attn_mask=attn_mask,
+            dropout_p=self.attn_dropout_p if self.training else 0.0,
+            is_causal=False
+        )
+        attn_output = attn_output.reshape(batch_size, self.num_heads, seq_len, self.head_dim)
+        return attn_output
+
+    def _standard_attention(self, Q, K, V, key_padding_mask=None):
+        scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(self.head_dim)  # (B, H, L, L)
+
+        if key_padding_mask is not None:
+            mask = key_padding_mask.to(torch.bool).unsqueeze(1).unsqueeze(1)  # (B, 1, 1, L)
+            fill_value = torch.finfo(scores.dtype).min
+            scores = scores.masked_fill(mask, fill_value)
+
+        attn_weights = F.softmax(scores, dim=-1)
+        attn_weights = self.attn_dropout(attn_weights)
+        attn_output = torch.matmul(attn_weights, V)
+        return attn_output
 
 class EncSALayer(nn.Module):
     def __init__(self, c, num_heads, dropout, attention_dropout=0.1,
-                 relu_dropout=0.1, kernel_size=9, act='gelu', rotary_embed=None):
+                 relu_dropout=0.1, kernel_size=9, act='gelu',
+                 rotary_embed=None, attention_type='normal'):
         super().__init__()
         self.dropout = dropout
         self.layer_norm1 = LayerNorm(c)
-        if rotary_embed is None:
+        if attention_type == 'flash':
+            self.self_attn = MultiheadSelfAttentionWithRoPE(
+                c, num_heads, dropout=attention_dropout, bias=False,
+                rotary_embed=rotary_embed, use_flash=True
+            )
+            self.attn_backend = 'custom'
+        elif rotary_embed is None:
             self.self_attn = MultiheadAttention(
                 c, num_heads, dropout=attention_dropout, bias=False, batch_first=True
             )
-            self.use_rope = False
+            self.attn_backend = 'pytorch'
         else:
             self.self_attn = MultiheadSelfAttentionWithRoPE(
-                c, num_heads, dropout=attention_dropout, bias=False, rotary_embed=rotary_embed
+                c, num_heads, dropout=attention_dropout, bias=False,
+                rotary_embed=rotary_embed, use_flash=False
             )
-            self.use_rope = True
+            self.attn_backend = 'custom'
         self.layer_norm2 = LayerNorm(c)
         self.ffn = TransformerFFNLayer(
             c, 4 * c, kernel_size=kernel_size, dropout=relu_dropout, act=act
@@ -266,9 +309,15 @@ class EncSALayer(nn.Module):
         if layer_norm_training is not None:
             self.layer_norm1.training = layer_norm_training
             self.layer_norm2.training = layer_norm_training
+
+        if encoder_padding_mask is None:
+            encoder_padding_mask = torch.zeros(
+                x.size(0), x.size(1), dtype=torch.bool, device=x.device
+            )
+
         residual = x
         x = self.layer_norm1(x)
-        if self.use_rope:
+        if self.attn_backend == 'custom':
             x = self.self_attn(x, key_padding_mask=encoder_padding_mask)
         else:
             x = x.transpose(0, 1)

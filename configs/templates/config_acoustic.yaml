@@ -72,6 +72,7 @@ augmentation_args:
 # diffusion and shallow diffusion
 diffusion_type: reflow
 enc_ffn_kernel_size: 3
+enc_attention_type: normal
 use_rope: true
 use_shallow_diffusion: true
 T_start: 0.4

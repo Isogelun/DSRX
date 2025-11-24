@@ -607,6 +607,19 @@ Size of TransformerFFNLayer convolution kernel size in FastSpeech2 encoder.
 <tr><td align="center"><b>default</b></td><td>3</td>
 </tbody></table>
 
+### enc_attention_type
+
+Self-attention implementation used inside the FastSpeech2 encoder. Set to `flash` to use PyTorch scaled-dot-product attention (FlashAttention kernels when available), or keep `normal` for the standard multi-head attention module.
+
+<table><tbody>
+<tr><td align="center"><b>visibility</b></td><td>acoustic, variance</td>
+<tr><td align="center"><b>scope</b></td><td>nn</td>
+<tr><td align="center"><b>customizability</b></td><td>normal</td>
+<tr><td align="center"><b>type</b></td><td>str</td>
+<tr><td align="center"><b>default</b></td><td>normal</td>
+<tr><td align="center"><b>constraints</b></td><td>Choose from 'normal', 'flash'.</td>
+</tbody></table>
+
 ### enc_layers
 
 Number of FastSpeech2 encoder layers.
@@ -1116,7 +1129,7 @@ Minimum mel spectrogram heatmap value for TensorBoard plotting.
 
 ### melody_encoder_args
 
-Arguments for melody encoder. Available sub-keys: `hidden_size`, `enc_layers`, `enc_ffn_kernel_size`, `ffn_act`, `dropout`, `num_heads`, `use_pos_embed`, `rel_pos`. If either of the parameter does not exist in this configuration key, it inherits from the linguistic encoder.
+Arguments for melody encoder. Available sub-keys: `hidden_size`, `enc_layers`, `enc_ffn_kernel_size`, `enc_attention_type`, `ffn_act`, `dropout`, `num_heads`, `use_pos_embed`, `rel_pos`. If either of the parameter does not exist in this configuration key, it inherits from the linguistic encoder.
 
 <table><tbody>
 <tr><td align="center"><b>type</b></td><td>dict</td>

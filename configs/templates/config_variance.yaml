@@ -66,6 +66,7 @@ tension_logit_min: -10.0
 tension_logit_max: 10.0
 
 enc_ffn_kernel_size: 3
+enc_attention_type: normal
 use_rope: true
 hidden_size: 256
 dur_prediction_args:

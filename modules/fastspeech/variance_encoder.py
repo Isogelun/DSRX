@@ -33,7 +33,8 @@ class FastSpeech2Variance(nn.Module):
             ffn_kernel_size=hparams['enc_ffn_kernel_size'], ffn_act=hparams['ffn_act'],
             dropout=hparams['dropout'], num_heads=hparams['num_heads'],
             use_pos_embed=hparams['use_pos_embed'], rel_pos=hparams.get('rel_pos', False), 
-            use_rope=hparams.get('use_rope', False)
+            use_rope=hparams.get('use_rope', False),
+            attention_type=hparams.get('enc_attention_type', 'normal')
         )
 
         dur_hparams = hparams['dur_prediction_args']
@@ -104,8 +105,10 @@ class MelodyEncoder(nn.Module):
     def __init__(self, enc_hparams: dict):
         super().__init__()
 
-        def get_hparam(key):
-            return enc_hparams.get(key, hparams.get(key))
+        def get_hparam(key, default=None):
+            if key in enc_hparams:
+                return enc_hparams[key]
+            return hparams.get(key, default)
 
         # MIDI inputs
         hidden_size = get_hparam('hidden_size')
@@ -124,7 +127,8 @@ class MelodyEncoder(nn.Module):
             ffn_kernel_size=get_hparam('enc_ffn_kernel_size'), ffn_act=get_hparam('ffn_act'),
             dropout=get_hparam('dropout'), num_heads=get_hparam('num_heads'),
             use_pos_embed=get_hparam('use_pos_embed'), rel_pos=get_hparam('rel_pos'),
-            use_rope=get_hparam('use_rope')
+            use_rope=get_hparam('use_rope'),
+            attention_type=get_hparam('enc_attention_type', 'normal')
         )
         self.out_proj = Linear(hidden_size, hparams['hidden_size'])
 
