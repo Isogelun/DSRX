@@ -130,7 +130,7 @@ class DiffSingerAcousticInfer(BaseSVSInfer):
                     f"Phoneme '{phone}' uses unknown language '{phone_lang}'."
                 )
                 lang_ids.append(self.lang_map[phone_lang])
-            batch['languages'] = torch.LongTensor(lang_ids).to(self.device)  # => [B, T_txt]
+            batch['languages'] = torch.LongTensor(lang_ids).to(self.device)[None]  # => [B=1, T_txt]
         txt_tokens = torch.LongTensor([
             self.phoneme_dictionary.encode(param['ph_seq'], lang=lang)
         ]).to(self.device)  # => [B, T_txt]

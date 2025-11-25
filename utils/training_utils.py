@@ -364,6 +364,62 @@ class DsTensorBoardLogger(TensorBoardLogger):
             del state["_all_rank_experiment"]
         return state
 
+
+def build_logger(work_dir: Path):
+    """
+    Build a logger based on hparams['logger_backend'].
+    Supports: tensorboard (default), wandb, swanlab.
+    """
+    backend = str(hparams.get('logger_backend', 'tensorboard')).lower()
+    run_name = hparams.get('exp_name') or Path(work_dir).name
+
+    if backend == 'tensorboard':
+        return DsTensorBoardLogger(
+            save_dir=str(work_dir),
+            name='lightning_logs',
+            version='latest'
+        )
+
+    if backend == 'wandb':
+        try:
+            from lightning.pytorch.loggers import WandbLogger
+        except ModuleNotFoundError as e:
+            raise ModuleNotFoundError(
+                "Requested WandB logging but package 'wandb' is not installed. "
+                "Install with `pip install wandb`."
+            ) from e
+        wandb_cfg = hparams.get('logger_wandb', {}) or {}
+        project = wandb_cfg.get('project') or run_name or 'dsrx'
+        return WandbLogger(
+            project=project,
+            entity=wandb_cfg.get('entity'),
+            group=wandb_cfg.get('group'),
+            tags=wandb_cfg.get('tags'),
+            name=run_name,
+            save_dir=str(work_dir),
+            log_model=False,
+        )
+
+    if backend == 'swanlab':
+        try:
+            from swanlab.integration.pytorch.lightning import SwanLabLogger
+        except ModuleNotFoundError as e:
+            raise ModuleNotFoundError(
+                "Requested SwanLab logging but package 'swanlab' is not installed. "
+                "Install with `pip install swanlab` (see https://docs.swanlab.cn/guide_cloud/general/what-is-swanlab.html)."
+            ) from e
+        sw_cfg = hparams.get('logger_swanlab', {}) or {}
+        project = sw_cfg.get('project') or run_name or 'dsrx'
+        return SwanLabLogger(
+            project=project,
+            workspace=sw_cfg.get('workspace'),
+            api_key=sw_cfg.get('api_key'),
+            experiment_name=run_name,
+            save_dir=str(work_dir),
+        )
+
+    raise ValueError(f"Unsupported logger backend: {backend}")
+
 def get_strategy(
     devices="auto",
     num_nodes=1,

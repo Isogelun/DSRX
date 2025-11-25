@@ -21,7 +21,7 @@ from basics.base_module import CategorizedModule
 from utils.hparams import hparams
 from utils.training_utils import (
     DsModelCheckpoint, DsTQDMProgressBar,
-    DsBatchSampler, DsTensorBoardLogger,
+    DsBatchSampler, build_logger,
     get_latest_checkpoint_path, get_strategy
 )
 from utils.phoneme_utils import load_phoneme_dictionary
@@ -434,6 +434,7 @@ class BaseTask(pl.LightningModule):
             max_updates_steps = hparams['max_updates']
             max_updates_ep = 2147483647
 
+        logger = build_logger(work_dir)
         trainer = pl.Trainer(
             accelerator=hparams['pl_trainer_accelerator'],
             devices=hparams['pl_trainer_devices'],
@@ -463,11 +464,7 @@ class BaseTask(pl.LightningModule):
                 # LearningRateMonitor(logging_interval='step'),
                 DsTQDMProgressBar(),
             ],
-            logger=DsTensorBoardLogger(
-                save_dir=str(work_dir),
-                name='lightning_logs',
-                version='latest'
-            ),
+            logger=logger,
             gradient_clip_val=hparams['clip_grad_norm'],
             val_check_interval=val_check_interval_steps,  # could be float (fraction of epoch) or int (number of steps)
             # so this is global_steps

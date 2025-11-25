@@ -68,6 +68,16 @@ hnsep_ckpt: 'ckpt/vr/model.pt'
 f0_min: 40
 f0_max: 2000
 num_valid_plots: 100
+logger_backend: tensorboard  # tensorboard | wandb | swanlab
+logger_wandb:
+  project: null  # default: exp_name
+  entity: null
+  group: null
+  tags: []
+logger_swanlab:
+  project: null  # default: exp_name
+  workspace: null
+  api_key: null
 
 ###########
 # pytorch lightning
