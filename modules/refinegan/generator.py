@@ -369,11 +369,35 @@ class RefineGANGenerator(nn.Module):
 
         self.sampling_rate = sampling_rate
         self.hop_length = hop_length
-        self.downsample_rates = downsample_rates
-        self.upsample_rates = upsample_rates
         self.leaky_relu_slope = leaky_relu_slope
 
-        assert np.prod(downsample_rates) == np.prod(upsample_rates) == hop_length
+        def _scale_last(rates, factor):
+            rates = list(rates)
+            rates[-1] = rates[-1] * factor
+            return tuple(rates)
+
+        total_down = np.prod(downsample_rates)
+        total_up = np.prod(upsample_rates)
+        if total_down != hop_length:
+            if hop_length % total_down != 0:
+                raise ValueError(
+                    f"RefineGAN: hop_length {hop_length} not divisible by prod(downsample_rates) {total_down}"
+                )
+            scale = hop_length // total_down
+            downsample_rates = _scale_last(downsample_rates, scale)
+            print(f"| adjust RefineGAN downsample_rates -> {downsample_rates} to match hop_length {hop_length}")
+        if total_up != hop_length:
+            if hop_length % total_up != 0:
+                raise ValueError(
+                    f"RefineGAN: hop_length {hop_length} not divisible by prod(upsample_rates) {total_up}"
+                )
+            scale = hop_length // total_up
+            upsample_rates = _scale_last(upsample_rates, scale)
+            print(f"| adjust RefineGAN upsample_rates -> {upsample_rates} to match hop_length {hop_length}")
+
+        # Keep the possibly-adjusted rates
+        self.downsample_rates = tuple(downsample_rates)
+        self.upsample_rates = tuple(upsample_rates)
 
         self.template_type = template_generator
         if template_generator == "comb":
@@ -524,4 +548,3 @@ class RefineGANGenerator(nn.Module):
         x = torch.tanh(x)
 
         return x
-

@@ -55,6 +55,13 @@ def _select_config_file(path: pathlib.Path) -> Optional[pathlib.Path]:
 
 def _extract_gen_kwargs(cfg: Dict[str, Any]) -> Dict[str, Any]:
     model_args = cfg.get("model_args") or cfg.get("generator") or {}
+    def pick(key: str, default: Any):
+        if key in model_args:
+            return model_args[key]
+        if key in cfg:
+            return cfg[key]
+        return default
+
     return {
         "sampling_rate": cfg.get("audio_sample_rate")
         or cfg.get("sampling_rate")
@@ -68,11 +75,11 @@ def _extract_gen_kwargs(cfg: Dict[str, Any]) -> Dict[str, Any]:
         or cfg.get("hop_length")
         or model_args.get("hop_length")
         or hparams["hop_size"],
-        "downsample_rates": tuple(model_args.get("downsample_rates", (2, 2, 8, 8))),
-        "upsample_rates": tuple(model_args.get("upsample_rates", (8, 8, 2, 2))),
-        "leaky_relu_slope": float(model_args.get("leaky_relu_slope", 0.2)),
-        "start_channels": int(model_args.get("start_channels", 16)),
-        "template_generator": model_args.get("template_generator", "comb"),
+        "downsample_rates": tuple(pick("downsample_rates", (2, 2, 8, 8))),
+        "upsample_rates": tuple(pick("upsample_rates", (8, 8, 2, 2))),
+        "leaky_relu_slope": float(pick("leaky_relu_slope", 0.2)),
+        "start_channels": int(pick("start_channels", 16)),
+        "template_generator": pick("template_generator", "comb"),
     }
 
 
@@ -216,4 +223,3 @@ class RefineGAN(BaseVocoder):
         with torch.no_grad():
             wav = self.spec2wav_torch(mel_np, f0=f0_t)
         return wav.cpu().numpy()
-
