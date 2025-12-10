@@ -300,7 +300,7 @@ class VarianceBinarizer(BaseBinarizer):
 
         global pitch_extractor
         if pitch_extractor is None:
-            pitch_extractor = initialize_pe()
+            pitch_extractor = initialize_pe(self.device)
         f0 = uv = None
         if self.prefer_ds:
             f0_seq = self.load_attr_from_ds(ds_id, name, 'f0_seq', idx=ds_seg_idx)

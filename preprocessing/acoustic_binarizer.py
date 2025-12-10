@@ -134,7 +134,7 @@ class AcousticBinarizer(BaseBinarizer):
         # get ground truth f0
         global pitch_extractor
         if pitch_extractor is None:
-            pitch_extractor = initialize_pe()
+            pitch_extractor = initialize_pe(self.device)
         gt_f0, uv = pitch_extractor.get_pitch(
             waveform, samplerate=hparams['audio_sample_rate'], length=length,
             hop_size=hparams['hop_size'], f0_min=hparams['f0_min'], f0_max=hparams['f0_max'],
@@ -229,7 +229,7 @@ class AcousticBinarizer(BaseBinarizer):
         aug_list = []
         all_item_names = [item_name for item_name, _ in data_iterator]
         total_scale = 0
-        aug_pe = initialize_pe()
+        aug_pe = initialize_pe(self.device)
         if self.augmentation_args['random_pitch_shifting']['enabled']:
             from augmentation.spec_stretch import SpectrogramStretchAugmentation
             aug_args = self.augmentation_args['random_pitch_shifting']

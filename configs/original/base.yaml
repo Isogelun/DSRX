@@ -11,6 +11,7 @@ binarizer_cls: null
 binarization_args:
   shuffle: false
   num_workers: 0
+  workers_per_gpu: false
 
 audio_sample_rate: 44100
 hop_size: 512

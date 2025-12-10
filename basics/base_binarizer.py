@@ -310,6 +310,23 @@ class BaseBinarizer:
 
         aug_map = self.arrange_data_augmentation(self.meta_data_iterator(prefix)) if apply_augmentation else {}
 
+        device_ids = None
+        num_workers = int(num_workers)
+        if (
+                num_workers > 0 and torch.cuda.is_available()
+                and (torch.cuda.device_count() > 1)
+        ):
+            per_gpu_workers = self.binarization_args.get('num_workers_per_gpu')
+            if per_gpu_workers is None and self.binarization_args.get('workers_per_gpu', False):
+                per_gpu_workers = num_workers
+            if per_gpu_workers:
+                per_gpu_workers = int(per_gpu_workers)
+                device_ids = [
+                    gpu for gpu in range(torch.cuda.device_count())
+                    for _ in range(per_gpu_workers)
+                ]
+                num_workers = len(device_ids)
+
         def postprocess(_item):
             nonlocal total_sec, total_raw_sec, extra_info, max_no
             if _item is None:
@@ -349,7 +366,9 @@ class BaseBinarizer:
             if num_workers > 0:
                 # code for parallel processing
                 for item in tqdm(
-                        chunked_multiprocess_run(self.process_item, args, num_workers=num_workers),
+                        chunked_multiprocess_run(
+                            self.process_item, args, num_workers=num_workers, device_ids=device_ids
+                        ),
                         total=len(list(self.meta_data_iterator(prefix)))
                 ):
                     postprocess(item)
